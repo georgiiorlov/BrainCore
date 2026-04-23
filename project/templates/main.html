@@ -1,0 +1,32 @@
+<!DOCTYPE html> 
+<html>
+<head>
+    <title>Главная</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>{{ message }}</h1>
+
+    <form method="post">
+        <input type="text" name="name" placeholder="Имя">
+        <input type="text" name="surname" placeholder="Фамилия">
+        <input type="text" name="phone" placeholder="Телефон">
+        <input type="text" name="age" placeholder="Возраст">
+        <input type="text" name="email" placeholder="Email">
+        <input type="password" name="password" placeholder="Пароль" required>
+        <button type="submit">Отправить</button>
+    </form>
+<a href="/login">Уже зарегистрированы? Войти</a>
+    {% if error %}
+        <p style="color:rgb(255, 255, 255);">{{ error }}</p>
+    {% endif %}
+
+    {% if message %}
+        <p style="color:rgb(255, 255, 255);">{{ message }}</p>
+    {% endif %}
+</div>
+
+</body>
+</html>
