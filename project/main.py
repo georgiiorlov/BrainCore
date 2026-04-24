@@ -11,6 +11,9 @@ from database import SessionLocal, engine
 from models import User
 from sqlalchemy.orm import Session
 from passlib.hash import bcrypt
+from models import User, Course
+from models import Enrollment
+
 
 app = FastAPI()
 from database import Base
@@ -36,11 +39,21 @@ async def profile(request: Request):
     if not user:
         return RedirectResponse(url="/")
 
+    db = SessionLocal()
+    courses = db.query(Course).all()
+    enrolled_courses = []
+    if user["role"] == "student":
+        enrollments = db.query(Enrollment).filter(Enrollment.user_email == user["email"]).all()
+        enrolled_ids = [e.course_id for e in enrollments]
+        enrolled_courses = db.query(Course).filter(Course.id.in_(enrolled_ids)).all()
+    db.close()
+
     return templates.TemplateResponse("profile.html", {
         "request": request,
-        "user": user
+        "user": user,
+        "courses": courses,
+        "enrolled_courses": enrolled_courses
     })
-
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -50,6 +63,45 @@ async def logout(request: Request):
     request.session.clear()
     return RedirectResponse(url="/", status_code=303)
 
+@app.get("/course/{course_id}/students", response_class=HTMLResponse)
+async def course_students(request: Request, course_id: int):
+    user = request.session.get("user")
+
+    # Только преподаватель имеет доступ
+    if not user or user["role"] != "teacher":
+        return RedirectResponse(url="/")
+
+    db = SessionLocal()
+
+    # Получаем курс
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        db.close()
+        return RedirectResponse(url="/profile")
+
+    # Получаем всех студентов записанных на этот курс
+    enrollments = db.query(Enrollment).filter(Enrollment.course_id == course_id).all()
+    
+    students = []
+    for enrollment in enrollments:
+        student = db.query(User).filter(User.email == enrollment.user_email).first()
+        if student:
+            students.append({
+                "name": student.name,
+                "surname": student.surname,
+                "email": student.email,
+                "phone": student.phone
+            })
+
+    db.close()
+
+    return templates.TemplateResponse("course_students.html", {
+        "request": request,
+        "course": course,
+        "students": students,
+        "user": user
+    })
+
 @app.post("/", response_class=HTMLResponse)
 async def submit(
     request: Request,
@@ -58,8 +110,9 @@ async def submit(
     phone: str = Form(...),
     age: str = Form(...),
     email: str = Form(...),
-    password: str = Form(...)
-):
+    password: str = Form(...),
+    role: str = Form(...)
+    ):
     db = SessionLocal()
     try:
         name2 = get_name(name)
@@ -79,7 +132,8 @@ async def submit(
             email=email2,
             password=hashed_password,
             phone=phone2,
-            age=age2)
+            age=age2,
+            role=role)
         db.add(user)
         db.commit()
         db.close()
@@ -88,7 +142,8 @@ async def submit(
             "surname": surname2,
             "email": email2,
             "age": age2,
-            "phone": phone2}
+            "phone": phone2,
+            "role": role}
         return RedirectResponse(url="/success", status_code=303)
     except Exception as e:
         return templates.TemplateResponse("main.html", {"request": request,"error": str(e)})
@@ -113,6 +168,57 @@ async def login(request: Request,
     "surname": user.surname,
     "email": user.email,
     "age": user.age,
-    "phone": user.phone}
+    "phone": user.phone,
+    "role": user.role}
+
+    return RedirectResponse(url="/profile", status_code=303)
+
+@app.post("/create-course")
+async def create_course(
+    request: Request,
+    title: str = Form(...),
+    description: str = Form(...)
+):
+    user = request.session.get("user")
+
+    if not user or user["role"] != "teacher":
+        return RedirectResponse(url="/")
+
+    db = SessionLocal()
+
+    course = Course(title=title, description=description)
+
+    db.add(course)
+    db.commit()
+    db.close()
+
+    return RedirectResponse(url="/profile", status_code=303)
+
+@app.post("/enroll")
+async def enroll(request: Request, course_id: int = Form(...)):
+    user = request.session.get("user")
+
+    if not user:
+        return RedirectResponse(url="/")
+
+    db = SessionLocal()
+
+    existing = db.query(Enrollment).filter(
+        Enrollment.user_email == user["email"],
+        Enrollment.course_id == course_id
+    ).first()
+
+    if existing:
+        db.close()
+        return RedirectResponse(url="/profile", status_code=303)
+
+    enrollment = Enrollment(
+        user_email=user["email"],
+        course_id=course_id
+    )
+
+    db.add(enrollment)
+    db.commit()
+    db.close()
 
     return RedirectResponse(url="/profile", status_code=303)
