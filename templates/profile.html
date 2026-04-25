@@ -1,33 +1,267 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Личный кабинет</title>
+    <meta charset="UTF-8">
+    <title>Личный кабинет — BrainCore</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .page { max-width: 520px; margin: 0 auto; }
+
+        /* Карточки */
+        .profile-card, .section-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 28px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            margin-bottom: 16px;
+            animation: fadeUp 0.45s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Шапка профиля */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            width: 56px; height: 56px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 800; color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-name h1 { color: white; font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+
+        .role-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 11px; font-weight: 700;
+            padding: 3px 10px; border-radius: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .info-item { display: flex; flex-direction: column; gap: 2px; }
+        .info-label {
+            color: rgba(255,255,255,0.55);
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.7px;
+        }
+        .info-value { color: white; font-size: 14px; font-weight: 600; }
+
+        /* Секции */
+        .section-title {
+            color: white; font-size: 17px; font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        /* Поля ввода */
+        input[type="text"] {
+            width: 100%; padding: 10px 12px;
+            border-radius: 10px;
+            border: 1.5px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.12);
+            color: white; font-size: 14px;
+            font-family: 'Nunito', Arial, sans-serif;
+            margin-bottom: 10px; outline: none;
+        }
+        input::placeholder { color: rgba(255,255,255,0.4); }
+        input:focus {
+            border-color: rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.18);
+        }
+
+        /* Кнопки */
+        .btn {
+            width: 100%; padding: 11px;
+            border: none; border-radius: 10px;
+            background: white; color: #333;
+            font-family: 'Nunito', Arial, sans-serif;
+            font-size: 14px; font-weight: 800;
+            cursor: pointer; transition: 0.25s;
+        }
+        .btn:hover { background: #222; color: white; }
+
+        .btn-enroll {
+            padding: 8px 18px;
+            border: none; border-radius: 8px;
+            background: white; color: #333;
+            font-family: 'Nunito', Arial, sans-serif;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: 0.25s;
+        }
+        .btn-enroll:hover { background: #222; color: white; }
+
+        .btn-students {
+            padding: 8px 18px;
+            border: 1.5px solid rgba(255,255,255,0.35);
+            border-radius: 8px;
+            background: transparent; color: rgba(255,255,255,0.85);
+            font-family: 'Nunito', Arial, sans-serif;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: 0.25s;
+            text-decoration: none; display: inline-block;
+        }
+        .btn-students:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        /* Карточка курса */
+        .course-card {
+            background: rgba(255,255,255,0.07);
+            border-radius: 12px; padding: 14px 16px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.2s;
+        }
+        .course-card:last-child { margin-bottom: 0; }
+        .course-card:hover { background: rgba(255,255,255,0.13); }
+        .course-card h3 { color: white; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+        .course-card p { color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 12px; }
+        .course-actions { display: flex; gap: 8px; align-items: center; }
+
+        .logout-link {
+            display: block; text-align: center;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none; font-size: 13px;
+            margin-top: 4px; transition: color 0.2s;
+        }
+        .logout-link:hover { color: white; }
+
+        .empty {
+            color: rgba(255,255,255,0.45);
+            font-size: 14px; text-align: center;
+            padding: 20px 0;
+        }
+    </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>Личный кабинет</h1>
+<div class="page">
 
     {% if user %}
 
-        <p><b>Имя:</b> {{ user.name }}</p>
-        <p><b>Фамилия:</b> {{ user.surname }}</p>
-        <p><b>Email:</b> {{ user.email }}</p>
-        <p><b>Возраст:</b> {{ user.age }}</p>
-        <p><b>Телефон:</b> {{ user.phone }}</p>
+    <!-- Карточка профиля -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="avatar">{{ user.name[0] }}{{ user.surname[0] }}</div>
+            <div class="profile-name">
+                <h1>{{ user.name }} {{ user.surname }}</h1>
+                <span class="role-badge">
+                    {% if user.role == "student" %}Студент{% else %}Преподаватель{% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Возраст</span>
+                <span class="info-value">{{ user.age }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Телефон</span>
+                <span class="info-value">{{ user.phone }}</span>
+            </div>
+        </div>
+    </div>
 
-        <br>
-        <a href="/logout">Выйти</a>
+    <!-- СТУДЕНТ -->
+    {% if user.role == "student" %}
+    <div class="section-card">
+        <div class="section-title">Доступные курсы</div>
+        {% if courses %}
+            {% for course in courses %}
+            <div class="course-card">
+                <h3>{{ course.title }}</h3>
+                <p>{{ course.description }}</p>
+                <div class="course-actions">
+                    <form method="post" action="/enroll" style="margin:0;">
+                        <input type="hidden" name="course_id" value="{{ course.id }}">
+                        <button type="submit" class="btn-enroll">Записаться</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty">Курсов пока нет</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    <!-- Мои курсы (студент) -->
+{% if enrolled_courses %}
+<div class="section-card">
+    <div class="section-title">Мои курсы</div>
+    {% for course in enrolled_courses %}
+    <div class="course-card">
+        <h3>{{ course.title }}</h3>
+        <p>{{ course.description }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+    <!-- ПРЕПОДАВАТЕЛЬ -->
+    {% if user.role == "teacher" %}
+    <div class="section-card">
+        <div class="section-title">Создать курс</div>
+        <form method="post" action="/create-course">
+            <input type="text" name="title" placeholder="Название курса" required>
+            <input type="text" name="description" placeholder="Описание курса" required>
+            <button type="submit" class="btn">Создать курс</button>
+        </form>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">Мои курсы</div>
+        {% if courses %}
+            {% for course in courses %}
+            <div class="course-card">
+                <h3>{{ course.title }}</h3>
+                <p>{{ course.description }}</p>
+                <div class="course-actions">
+                    <a href="/course/{{ course.id }}/students" class="btn-students">Студенты</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty">Вы ещё не создали ни одного курса</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <a href="/logout" class="logout-link">Выйти из аккаунта →</a>
 
     {% else %}
-
-        <p>Пользователь не найден</p>
-        <a href="/login">Войти</a>
-
+    <div class="section-card" style="text-align:center;">
+        <p style="color:rgba(255,255,255,0.7); margin-bottom:16px;">Пользователь не найден</p>
+        <a href="/login" class="btn" style="display:inline-block; width:auto; padding: 10px 24px; text-decoration:none;">Войти</a>
+    </div>
     {% endif %}
 
 </div>
-
 </body>
 </html>
