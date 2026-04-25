@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная — BrainCore</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Nunito', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 420px;
+            animation: fadeUp 0.5s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo { text-align: center; margin-bottom: 6px; }
+        .logo-icon {
+            width: 52px; height: 52px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            font-size: 26px; margin-bottom: 12px;
+        }
+
+        h1 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+
+        .tagline {
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        label {
+            color: rgba(255,255,255,0.7);
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding-left: 2px;
+        }
+
+        input {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1.5px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.12);
+            color: white;
+            font-size: 14px;
+            font-family: 'Nunito', Arial, sans-serif;
+        }
+        input::placeholder { color: rgba(255,255,255,0.4); }
+        input:focus {
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.18);
+            outline: none;
+        }
+
+        .role-group { display: flex; gap: 8px; }
+        .role-btn {
+            flex: 1; padding: 10px;
+            border-radius: 10px;
+            border: 1.5px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.7);
+            font-family: 'Nunito', Arial, sans-serif;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: 0.2s;
+        }
+        .role-btn:hover { background: rgba(255,255,255,0.18); color: white; }
+        .role-btn.active {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.6);
+            color: white;
+        }
+
+        button[type="submit"] {
+            width: 100%; padding: 12px;
+            margin-top: 18px; border: none;
+            background: white; color: #333;
+            border-radius: 10px; cursor: pointer;
+            font-family: 'Nunito', Arial, sans-serif;
+            font-size: 15px; font-weight: 800;
+            transition: 0.3s;
+        }
+        button[type="submit"]:hover { background: #222; color: white; }
+
+        .login-link { text-align: center; margin-top: 18px; }
+        .login-link a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none; font-size: 13px;
+        }
+        .login-link a:hover { color: white; }
+
+        .error {
+            margin-top: 14px;
+            background: rgba(255,80,80,0.2);
+            border: 1px solid rgba(255,100,100,0.4);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white; font-size: 13px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">
+        <div class="logo-icon">🧠</div>
+    </div>
+    <h1>{{ message }}</h1>
+    <p class="tagline">Создайте аккаунт, чтобы начать обучение</p>
+
+    <form method="post">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Имя</label>
+                <input type="text" name="name" placeholder="Алина" required>
+            </div>
+            <div class="form-group">
+                <label>Фамилия</label>
+                <input type="text" name="surname" placeholder="Иванова" required>
+            </div>
+            <div class="form-group">
+                <label>Телефон</label>
+                <input type="text" name="phone" placeholder="+7 999 000-00-00" required>
+            </div>
+            <div class="form-group">
+                <label>Возраст</label>
+                <input type="text" name="age" placeholder="20" required>
+            </div>
+            <div class="form-group full">
+                <label>Email</label>
+                <input type="text" name="email" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group full">
+                <label>Пароль</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <div class="form-group full">
+                <label>Роль</label>
+                <div class="role-group">
+                    <button type="button" class="role-btn active" onclick="selectRole('student', this)">🎓 Студент</button>
+                    <button type="button" class="role-btn" onclick="selectRole('teacher', this)">📚 Преподаватель</button>
+                </div>
+                <input type="hidden" name="role" id="roleInput" value="student">
+            </div>
+        </div>
+
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+
+    <div class="login-link">
+        <a href="/login">Уже зарегистрированы? Войти →</a>
+    </div>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+</div>
+
+<script>
+    function selectRole(role, el) {
+        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('roleInput').value = role;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Личный кабинет</h1>
+
+    {% if user %}
+
+        <p><b>Имя:</b> {{ user.name }}</p>
+        <p><b>Фамилия:</b> {{ user.surname }}</p>
+        <p><b>Email:</b> {{ user.email }}</p>
+        <p><b>Возраст:</b> {{ user.age }}</p>
+        <p><b>Телефон:</b> {{ user.phone }}</p>
+
+        <br>
+        <a href="/logout">Выйти</a>
+
+    {% else %}
+
+        <p>Пользователь не найден</p>
+        <a href="/login">Войти</a>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>
