@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Личный кабинет</title>
+    <meta charset="UTF-8">
+    <title>Вход — BrainCore</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-
-    <h1>Вход</h1>
+<div class="container">
+    <h1>Вход в BrainCore</h1>
 
     <form method="post">
         <input type="text" name="email" placeholder="Email" required>
@@ -18,5 +19,7 @@
         <p style="color:red;">{{ error }}</p>
     {% endif %}
 
+    <p><a href="/">Нет аккаунта? Зарегистрироваться →</a></p>
+</div>
 </body>
 </html>

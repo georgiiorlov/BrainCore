@@ -217,7 +217,9 @@
     <div class="section-title">Мои курсы</div>
     {% for course in enrolled_courses %}
     <div class="course-card">
-        <h3>{{ course.title }}</h3>
+    <a href="/course/{{ course.id }}" style="text-decoration:none;">
+    <h3>{{ course.title }}</h3>
+</a>
         <p>{{ course.description }}</p>
     </div>
     {% endfor %}
@@ -240,7 +242,9 @@
         {% if courses %}
             {% for course in courses %}
             <div class="course-card">
-                <h3>{{ course.title }}</h3>
+                <a href="/course/{{ course.id }}" style="text-decoration:none;">
+    <h3>{{ course.title }}</h3>
+</a>
                 <p>{{ course.description }}</p>
                 <div class="course-actions">
                     <a href="/course/{{ course.id }}/students" class="btn-students">Студенты</a>

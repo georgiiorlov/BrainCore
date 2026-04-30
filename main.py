@@ -54,6 +54,33 @@ async def profile(request: Request):
         "courses": courses,
         "enrolled_courses": enrolled_courses
     })
+
+@app.get("/course/{course_id}", response_class=HTMLResponse)
+async def course_detail(request: Request, course_id: int):
+    user = request.session.get("user")
+
+    if not user:
+        return RedirectResponse(url="/")
+
+    db = SessionLocal()
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+
+    if not course:
+        db.close()
+        return RedirectResponse(url="/profile")
+
+    # получаем преподавателя (если добавишь teacher_email)
+    teacher = db.query(User).filter(User.role == "teacher").first()
+
+    db.close()
+
+    return templates.TemplateResponse("course.html", {
+        "request": request,
+        "course": course,
+        "teacher": teacher,
+        "user": user
+    })
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
