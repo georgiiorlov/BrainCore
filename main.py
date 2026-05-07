@@ -5,14 +5,13 @@ from fastapi.staticfiles import StaticFiles
 from valid import get_name, get_surname, get_email, get_age, get_phonenumber, get_password
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-
-
+from datetime import date
 from database import SessionLocal, engine
 from models import User
 from sqlalchemy.orm import Session
 from passlib.hash import bcrypt
 from models import User, Course
-from models import Enrollment
+from models import Enrollment, Attendance
 
 
 app = FastAPI()
@@ -81,6 +80,9 @@ async def course_detail(request: Request, course_id: int):
         "teacher": teacher,
         "user": user
     })
+
+
+
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
@@ -126,6 +128,46 @@ async def course_students(request: Request, course_id: int):
         "request": request,
         "course": course,
         "students": students,
+        "user": user
+    })
+
+@app.get("/course/{course_id}/attendance", response_class=HTMLResponse)
+async def attendance_page(course_id: int, request: Request):
+    user = request.session.get("user")
+
+    if not user or user["role"] != "teacher":
+        return RedirectResponse(url="/")
+
+    db = SessionLocal()
+
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        db.close()
+        return RedirectResponse(url="/profile")
+
+    enrollments = db.query(Enrollment).filter(Enrollment.course_id == course_id).all()
+    students = []
+    for e in enrollments:
+        student = db.query(User).filter(User.email == e.user_email).first()
+        if student:
+            students.append(student)
+
+    records = db.query(Attendance).filter(Attendance.course_id == course_id).all()
+
+    dates = sorted(set(r.date for r in records))
+
+    table = {}
+    for s in students:
+        table[s.email] = {r.date: r.present for r in records if r.student_email == s.email}
+
+    db.close()
+
+    return templates.TemplateResponse("attendance.html", {
+        "request": request,
+        "course": course,
+        "students": students,
+        "dates": dates,
+        "table": table,
         "user": user
     })
 
@@ -249,3 +291,55 @@ async def enroll(request: Request, course_id: int = Form(...)):
     db.close()
 
     return RedirectResponse(url="/profile", status_code=303)
+
+@app.post("/course/{course_id}/attendance")
+async def save_attendance(course_id: int, request: Request):
+    user = request.session.get("user")
+
+    if not user or user["role"] != "teacher":
+        return RedirectResponse(url="/")
+
+    db = SessionLocal()
+    form = await request.form()
+
+    # Собираем все отмеченные чекбоксы: ключи вида "email__2024-05-01"
+    attendance_map = {}
+    for key in form.keys():
+        if "__" in key:
+            email, date_str = key.split("__", 1)
+            attendance_map[(email, date_str)] = True
+
+    # Получаем всех студентов курса
+    enrollments = db.query(Enrollment).filter(Enrollment.course_id == course_id).all()
+
+    # Собираем все даты: уже существующие + новая (если есть)
+    existing_records = db.query(Attendance).filter(Attendance.course_id == course_id).all()
+    all_dates = set(r.date.isoformat() for r in existing_records)
+
+    new_date_str = form.get("new_date")
+    if new_date_str:
+        all_dates.add(new_date_str)
+
+    # Обновляем посещаемость по ВСЕМ датам
+    for date_str in all_dates:
+        current_date = date.fromisoformat(date_str)
+        for e in enrollments:
+            present = (e.user_email, date_str) in attendance_map
+            existing = db.query(Attendance).filter(
+                Attendance.student_email == e.user_email,
+                Attendance.course_id == course_id,
+                Attendance.date == current_date
+            ).first()
+            if existing:
+                existing.present = present
+            else:
+                db.add(Attendance(
+                    student_email=e.user_email,
+                    course_id=course_id,
+                    date=current_date,
+                    present=present
+                ))
+
+    db.commit()
+    db.close()
+    return RedirectResponse(f"/course/{course_id}/attendance", status_code=303)

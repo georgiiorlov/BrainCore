@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from database import Base
 
 
@@ -29,3 +29,12 @@ class Enrollment(Base):
     id = Column(Integer, primary_key=True)
     user_email = Column(String)
     course_id = Column(Integer, ForeignKey("courses.id"))
+
+class Attendance(Base):
+    __tablename__ = "attendance"
+
+    id = Column(Integer, primary_key=True)
+    student_email = Column(String, ForeignKey("users.email"))
+    course_id = Column(Integer, ForeignKey("courses.id"))
+    date = Column(Date)
+    present = Column(Boolean, default=False)
